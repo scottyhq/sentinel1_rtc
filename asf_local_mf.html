@@ -1,0 +1,1432 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Xarray open_mfdataset() approach &#8212; Sentinel-1 RTC data workflows with xarray</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="GDAL VRT approach" href="asf_local_vrt_troubleshoot.html" />
+    <link rel="prev" title="Data cleaning and organization" href="ch1_root.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="index.html">
+      
+      
+      
+      <h1 class="site-logo" id="site-title">Sentinel-1 RTC data workflows with xarray</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="intro.html">
+                    Thanks for coming to this site! Please note it is under construction
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="ch1_root.html">
+   Data cleaning and organization
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     Xarray
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       open_mfdataset()
+      </span>
+     </code>
+     approach
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="asf_local_vrt_troubleshoot.html">
+     GDAL VRT approach
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="PC_RTC.html">
+     Microsoft Planetary Computer Sentinel-1 RTC Imagery
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="ch2_root.html">
+   Dataset comparison and preliminary analysis
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="dataset_comparison_new.html">
+     RTC dataset comparison
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="rtc_timeseries.html">
+     RTC time series analysis
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="questions.html">
+   Tutorial structure questions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="todo.html">
+   To do
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="References.html">
+   References
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<div class="menu-dropdown menu-dropdown-launch-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Launch interactive content">
+      <i class="fas fa-rocket"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://mybinder.org/v2/gh/e-marshall/sentinel_rtc/main?urlpath=tree/asf_local_mf.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Launch on Binder"
+>
+  
+
+<span class="headerbtn__icon-container">
+  
+    <img src="_static/images/logo_binder.svg">
+  </span>
+<span class="headerbtn__text-container">Binder</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+<a href="https://github.com/e-marshall/sentinel_rtc"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="bottom"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="_sources/asf_local_mf.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#software-and-setup">
+   Software and setup
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#organize-file-paths">
+     Organize file paths
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#read-in-files-using-xr-open-mfdataset">
+   Read in files using
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     xr.open_mfdataset()
+    </span>
+   </code>
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#clip-stack-to-aoi-using-rioxarray-clip">
+   Clip stack to AOI using
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     rioxarray.clip()
+    </span>
+   </code>
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#wrap-up">
+   Wrap-up
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#convert-from-power-to-db-scale">
+   Convert from power to db scale
+  </a>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Xarray open_mfdataset() approach</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#software-and-setup">
+   Software and setup
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#organize-file-paths">
+     Organize file paths
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#read-in-files-using-xr-open-mfdataset">
+   Read in files using
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     xr.open_mfdataset()
+    </span>
+   </code>
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#clip-stack-to-aoi-using-rioxarray-clip">
+   Clip stack to AOI using
+   <code class="docutils literal notranslate">
+    <span class="pre">
+     rioxarray.clip()
+    </span>
+   </code>
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#wrap-up">
+   Wrap-up
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#convert-from-power-to-db-scale">
+   Convert from power to db scale
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="xarray-open-mfdataset-approach">
+<h1>Xarray <code class="docutils literal notranslate"><span class="pre">open_mfdataset()</span></code> approach<a class="headerlink" href="#xarray-open-mfdataset-approach" title="Permalink to this headline">#</a></h1>
+<p>This is a notebook demonstrates working with Sentinel-1 RTC imagery that has been processsed on the ASF On-Demand server and downloaded locally.</p>
+<p>The access point for data in this notebook is a directory containing un-zipped directories of RTC scenes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>worth including image of directory structure here?</p>
+</div>
+<p>This tutorial contains examples of two approaches to working with locally-downloaded ASF-processed Sentinel-1 RTC imagery. This notebook will detail how to use the xarray function <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code>. While this approach works and is very useful for working with large stacks of data with associated metadata, you will also see an example of the limitations of this approach due to certain characteristics of the dataset. You can read more about <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code> <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html">here</a>.</p>
+<p><strong>Learning goals</strong>:</p>
+<p>Handling large amounts of locally stored data</p>
+<ul class="simple">
+<li><p>organize large set of geotiff files stored locally</p></li>
+<li><p>multiple methods for reading data into python as <code class="docutils literal notranslate"><span class="pre">xarray</span></code> objects</p>
+<ul>
+<li><p>xarray <code class="docutils literal notranslate"><span class="pre">open_mfdataset()</span></code></p></li>
+</ul>
+</li>
+</ul>
+<section id="software-and-setup">
+<h2>Software and setup<a class="headerlink" href="#software-and-setup" title="Permalink to this headline">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span> <span class="nn">rioxarray</span> <span class="k">as</span> <span class="nn">rio</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">dask</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We’ll use this function later but defining it now:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">points2coords</span><span class="p">(</span><span class="n">pt_ls</span><span class="p">):</span> <span class="c1">#should be [xmin, ymin, xmax, ymax]</span>
+    
+    <span class="n">coords_ls</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pt_ls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pt_ls</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="p">(</span><span class="n">pt_ls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pt_ls</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                 <span class="p">(</span><span class="n">pt_ls</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">pt_ls</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span> <span class="p">(</span><span class="n">pt_ls</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">pt_ls</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                 <span class="p">(</span><span class="n">pt_ls</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pt_ls</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="k">return</span> <span class="n">coords_ls</span>
+    
+</pre></div>
+</div>
+</div>
+</div>
+<p>Initialize a <code class="docutils literal notranslate"><span class="pre">dask.distributed</span></code> client:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>On my local machine, I ran into issues initially when the cluster was running on processes rather than threads. This caused system memory issues and many dead kernels. Setting <code class="docutils literal notranslate"><span class="pre">processes=False</span></code> seemed to fix these issues</p>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1">#look into limiting memory</span>
+<span class="n">client</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
+<span class="n">File</span> <span class="o">~/</span><span class="n">micromamba</span><span class="o">-</span><span class="n">root</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">s1rtc</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dask</span><span class="o">/</span><span class="n">distributed</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">11</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">11</span>     <span class="kn">from</span> <span class="nn">distributed</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+<span class="ne">ModuleNotFoundError</span>: No module named &#39;distributed&#39;
+
+<span class="n">The</span> <span class="n">above</span> <span class="n">exception</span> <span class="n">was</span> <span class="n">the</span> <span class="n">direct</span> <span class="n">cause</span> <span class="n">of</span> <span class="n">the</span> <span class="n">following</span> <span class="n">exception</span><span class="p">:</span>
+
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">Client</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1">#look into limiting memory</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">client</span>
+
+<span class="n">File</span> <span class="o">~/</span><span class="n">micromamba</span><span class="o">-</span><span class="n">root</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">s1rtc</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">dask</span><span class="o">/</span><span class="n">distributed</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">14</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>     <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">msg</span> <span class="o">==</span> <span class="s2">&quot;No module named &#39;distributed&#39;&quot;</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">14</span>         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">_import_error_message</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span>     <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">16</span>         <span class="k">raise</span>
+
+<span class="ne">ImportError</span>: dask.distributed is not installed.
+
+<span class="n">Please</span> <span class="n">either</span> <span class="n">conda</span> <span class="ow">or</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">distributed</span><span class="p">:</span>
+
+  <span class="n">conda</span> <span class="n">install</span> <span class="n">dask</span> <span class="n">distributed</span>             <span class="c1"># either conda install</span>
+  <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s2">&quot;dask[distributed]&quot;</span> <span class="o">--</span><span class="n">upgrade</span>    <span class="c1"># or pip install</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Open the dask dashboard at the link above to monitor task progress.</p>
+<section id="organize-file-paths">
+<h3>Organize file paths<a class="headerlink" href="#organize-file-paths" title="Permalink to this headline">#</a></h3>
+<p>Set up some string variables for directory paths. We need to pass <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code> a list of all files to read in. Currently, the file structure is organized so that each scene has its own sub-directory within <code class="docutils literal notranslate"><span class="pre">unzipped_keep</span></code>. Within each sub-directory are several files - we want to extract the tif files containing RTC imagery for the VV and VH polarizations for each scene as well as the layover-shadow mask for each scene. The function <code class="docutils literal notranslate"><span class="pre">extract_tif_fnames()</span></code> takes a path to the directory containing the sub-directories for all scenes and returns a list of the filenames for VV-polarization tif files, VH-polarization tif files and layover-shadow mask tif files.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dir_path_all</span> <span class="o">=</span> <span class="s1">&#39;/home/emmamarshall/Desktop/siparcs/asf_rtc_data/unzipped_keep/&#39;</span> <span class="c1">#rename this</span>
+<span class="n">scenes_ls</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_path_all</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">extract_tif_fnames</span><span class="p">(</span><span class="n">scene_path</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; given a path to an individual S1 scene, return a list of files associated with a single S1 scene&#39;&#39;&#39;</span>
+    <span class="n">scene_files_ls</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_path_all</span> <span class="o">+</span> <span class="n">scene_path</span><span class="p">)</span>
+    
+    <span class="n">scene_files_vv</span> <span class="o">=</span> <span class="p">[</span><span class="n">fname</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">scene_files_ls</span> <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_VH.tif&#39;</span><span class="p">)]</span>
+    <span class="n">scene_files_vh</span> <span class="o">=</span> <span class="p">[</span><span class="n">fname</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">scene_files_ls</span> <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_VV.tif&#39;</span><span class="p">)]</span>
+    <span class="n">scene_files_ls</span> <span class="o">=</span> <span class="p">[</span><span class="n">fname</span> <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">scene_files_ls</span> <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_ls_map.tif&#39;</span><span class="p">)]</span>
+    
+    <span class="k">return</span> <span class="n">scene_files_vv</span><span class="p">,</span> <span class="n">scene_files_vh</span><span class="p">,</span> <span class="n">scene_files_ls</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">FileNotFoundError</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">dir_path_all</span> <span class="o">=</span> <span class="s1">&#39;/home/emmamarshall/Desktop/siparcs/asf_rtc_data/unzipped_keep/&#39;</span> <span class="c1">#rename this</span>
+<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">scenes_ls</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_path_all</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="k">def</span> <span class="nf">extract_tif_fnames</span><span class="p">(</span><span class="n">scene_path</span><span class="p">):</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span>     <span class="sd">&#39;&#39;&#39; given a path to an individual S1 scene, return a list of files associated with a single S1 scene&#39;&#39;&#39;</span>
+
+<span class="ne">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/home/emmamarshall/Desktop/siparcs/asf_rtc_data/unzipped_keep/&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we need to attach the filenames to the full path to each file. We will end up with a list of full paths to all three tif files for each scene in the stack.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fpaths_vv</span><span class="p">,</span> <span class="n">fpaths_vh</span><span class="p">,</span> <span class="n">fpaths_ls</span> <span class="o">=</span> <span class="p">[],[],[]</span>
+
+<span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scenes_ls</span><span class="p">)):</span>
+    
+    <span class="n">good_files</span> <span class="o">=</span> <span class="n">extract_tif_fnames</span><span class="p">(</span><span class="n">scenes_ls</span><span class="p">[</span><span class="n">element</span><span class="p">])</span>
+    
+    <span class="n">path_vh</span> <span class="o">=</span> <span class="n">dir_path_all</span> <span class="o">+</span> <span class="n">scenes_ls</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">good_files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">path_vv</span> <span class="o">=</span> <span class="n">dir_path_all</span> <span class="o">+</span> <span class="n">scenes_ls</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">good_files</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">path_ls</span> <span class="o">=</span> <span class="n">dir_path_all</span> <span class="o">+</span> <span class="n">scenes_ls</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">good_files</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="n">fpaths_vv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_vv</span><span class="p">)</span>
+    <span class="n">fpaths_vh</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_vh</span><span class="p">)</span>
+    <span class="n">fpaths_ls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_ls</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">fpaths_vv</span><span class="p">,</span> <span class="n">fpaths_vh</span><span class="p">,</span> <span class="n">fpaths_ls</span> <span class="o">=</span> <span class="p">[],[],[]</span>
+<span class="ne">----&gt; </span><span class="mi">3</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scenes_ls</span><span class="p">)):</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span>     <span class="n">good_files</span> <span class="o">=</span> <span class="n">extract_tif_fnames</span><span class="p">(</span><span class="n">scenes_ls</span><span class="p">[</span><span class="n">element</span><span class="p">])</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span>     <span class="n">path_vh</span> <span class="o">=</span> <span class="n">dir_path_all</span> <span class="o">+</span> <span class="n">scenes_ls</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">good_files</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="ne">NameError</span>: name &#39;scenes_ls&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="read-in-files-using-xr-open-mfdataset">
+<h2>Read in files using <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code><a class="headerlink" href="#read-in-files-using-xr-open-mfdataset" title="Permalink to this headline">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code> function reads multiple files (in a directory or from a list) and combines them to return a single <code class="docutils literal notranslate"><span class="pre">xr.Dataset</span></code> or <code class="docutils literal notranslate"><span class="pre">xr.DataArray</span></code>. To use the function, specify parameters such as how the files should be combined as well as any preprocessing to execute on the original files. This example will demonstrate a workflow for using <code class="docutils literal notranslate"><span class="pre">open_mfdataset()</span></code> to read in three stacks of roughly 100 RTC images.</p>
+<p><code class="docutils literal notranslate"><span class="pre">preprocess_vv</span></code>, <code class="docutils literal notranslate"><span class="pre">preprocess_vh</span></code>  and <code class="docutils literal notranslate"><span class="pre">preprocess_ls</span></code> are identical but for vv and vh bands (read from different tif files). <code class="docutils literal notranslate"><span class="pre">preprocess_ls</span></code> reads in the layover shadow masks that are provided with each scene and similarly stored as tiff files.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>can the preprocess fn take input parameters in addition to the ds? if so consider combining these into one preprocess function with an input parameter for variable (VV, VH, LS)?</p>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">preprocess_vv</span><span class="p">(</span><span class="n">da_orig</span><span class="p">):</span>
+<span class="c1">#def preprocess(da_orig, var_name):</span>
+    <span class="sd">&#39;&#39;&#39;function that should return an xarray object with time dimension and associated metadata given a path to a single RTC scene, if its dualpol will have multiple bands, currently just as 2 data arrays but could merge.</span>
+<span class="sd">    goal would be to apply this a list of directories for different RTC products, return cube along time dimension - I think? </span>
+<span class="sd">    - for concatenating, would need to check footprints and only take products with the same footprint, or subset them all to a common AOI? &#39;&#39;&#39;</span>
+
+    
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da_orig</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s1">&#39;band_data&#39;</span><span class="p">:</span><span class="s1">&#39;vv&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="c1">#da = da.rename({&#39;band_data&#39;:f&#39;{var_name}&#39;}).squeeze()</span>
+    
+    <span class="c1">#we want to extract important metadata from the tif filenames</span>
+    <span class="c1">#use the &#39;source&#39; key from the encoding dictionary to attach the filename</span>
+    <span class="n">vv_fn</span> <span class="o">=</span> <span class="n">da_orig</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="mi">113</span><span class="p">:]</span>
+    
+    <span class="c1">#extract relevant metadata</span>
+    <span class="n">sensor</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">beam_mode</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">acq_date_raw</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span> <span class="c1">#need to parse further</span>
+    <span class="n">acq_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">acq_date_raw</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">acq_time</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">22</span><span class="p">]</span>
+    <span class="n">pol_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">25</span><span class="p">]</span> <span class="c1"># dual pol ...</span>
+    <span class="n">primary_pol</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">25</span><span class="p">:</span><span class="mi">26</span><span class="p">]</span> <span class="c1"># VV ...</span>
+    <span class="n">orbit_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">26</span><span class="p">:</span><span class="mi">27</span><span class="p">]</span> <span class="c1">#Precise (P), Restituted (R), or Original Predicted (O)</span>
+    <span class="n">terrain_correction_pixel_spacing</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">27</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span> <span class="c1">#Terrain Correction Pixel Spacing</span>
+    <span class="n">rtc_alg</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">34</span><span class="p">]</span> <span class="c1">#Software Package Used: GAMMA (G)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">35</span><span class="p">]</span> <span class="c1">#  Gamma-0 (g) or Sigma-0 (s) Output</span>
+    <span class="n">output_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">36</span><span class="p">]</span> <span class="c1">#Power (p) or Decibel (d) or Amplitude (a) Output</span>
+    <span class="n">masked</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">37</span><span class="p">]</span>  <span class="c1">#Unmasked (u) or Water Masked (w)</span>
+    <span class="n">filtered</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">38</span><span class="p">]</span>  <span class="c1"># Not Filtered (n) or Filtered (f)</span>
+    <span class="n">area</span> <span class="o">=</span>  <span class="n">vv_fn</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span>       <span class="c1"># Entire Area (e) or Clipped Area (c)</span>
+    <span class="n">tbd</span> <span class="o">=</span>   <span class="n">vv_fn</span><span class="p">[</span><span class="mi">40</span><span class="p">]</span>   <span class="c1">#Dead Reckoning (d) or DEM Matching (m)</span>
+    <span class="n">product_id</span>  <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">42</span><span class="p">:</span><span class="mi">46</span><span class="p">]</span>  <span class="c1">#Product ID</span>
+    
+    <span class="c1">#combine metadata into dictionary that will be used to assign attrs</span>
+    <span class="n">attrs_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;sensor&#39;</span><span class="p">:</span> <span class="n">sensor</span><span class="p">,</span>
+                    <span class="s1">&#39;beam_mode&#39;</span><span class="p">:</span><span class="n">beam_mode</span><span class="p">,</span> 
+                    <span class="s1">&#39;acquisition_date&#39;</span> <span class="p">:</span> <span class="n">acq_date</span><span class="p">,</span>
+                    <span class="s1">&#39;acquisition_time&#39;</span><span class="p">:</span> <span class="n">acq_time</span><span class="p">,</span>
+                    <span class="s1">&#39;polarisation_type&#39;</span><span class="p">:</span> <span class="n">pol_type</span><span class="p">,</span>
+                    <span class="s1">&#39;primary_polarisation&#39;</span><span class="p">:</span> <span class="n">primary_pol</span><span class="p">,</span>
+                    <span class="s1">&#39;orbit_type&#39;</span><span class="p">:</span> <span class="n">orbit_type</span><span class="p">,</span>
+                    <span class="s1">&#39;terrain_correction_pixel_spacing&#39;</span> <span class="p">:</span> <span class="n">terrain_correction_pixel_spacing</span><span class="p">,</span>
+                    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span>
+                    <span class="s1">&#39;output_type&#39;</span><span class="p">:</span> <span class="n">output_type</span><span class="p">,</span>
+                    <span class="s1">&#39;masked&#39;</span> <span class="p">:</span> <span class="n">masked</span><span class="p">,</span>
+                    <span class="s1">&#39;filtered&#39;</span><span class="p">:</span><span class="n">filtered</span><span class="p">,</span>
+                    <span class="s1">&#39;area&#39;</span><span class="p">:</span><span class="n">area</span><span class="p">,</span>
+                    <span class="s1">&#39;product_id&#39;</span><span class="p">:</span> <span class="n">product_id</span> 
+             <span class="p">}</span>
+                    
+    <span class="c1">#link the strings for each of the above variables to their full names (from README, commented above)</span>
+    <span class="c1">#eg if output_type=g, should read &#39;gamma&#39;</span>
+    <span class="c1">#add these as attrs to xr obj, make into dict first? </span>
+    <span class="c1"># parse acq_date to datetime, add as dim and coordinate to xr obj</span>
+    <span class="c1">#add other metadata vars as attributes to xr obj</span>
+    
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs_dict</span>
+    
+    <span class="n">utm_zone</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">spatial_ref</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;crs_wkt&#39;</span><span class="p">][</span><span class="mi">17</span><span class="p">:</span><span class="mi">29</span><span class="p">]</span>
+    <span class="n">epsg_code</span> <span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">spatial_ref</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;crs_wkt&#39;</span><span class="p">][</span><span class="mi">589</span><span class="p">:</span><span class="mi">594</span><span class="p">]</span>
+    
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;utm_zone&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utm_zone</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;epsg_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;EPSG:</span><span class="si">{</span><span class="n">epsg_code</span><span class="si">}</span><span class="s1">&#39;</span>
+    
+    <span class="n">date</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;acquisition_date&#39;</span><span class="p">]</span>
+    
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="s1">&#39;acq_date&#39;</span><span class="p">:</span><span class="n">date</span><span class="p">})</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s1">&#39;acq_date&#39;</span><span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">da</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Repeat for the other two variables (unless these can be combined into one preprocess?)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">preprocess_vh</span><span class="p">(</span><span class="n">da_orig</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;function that should return an xarray object with time dimension and associated metadata given a path to a single RTC scene, if its dualpol will have multiple bands, currently just as 2 data arrays but could merge.</span>
+<span class="sd">    goal would be to apply this a list of directories for different RTC products, return cube along time dimension - I think? </span>
+<span class="sd">    - for concatenating, would need to check footprints and only take products with the same footprint, or subset them all to a common AOI? &#39;&#39;&#39;</span>
+
+    
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da_orig</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s1">&#39;band_data&#39;</span><span class="p">:</span><span class="s1">&#39;vh&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+   
+    <span class="n">vv_fn</span> <span class="o">=</span> <span class="n">da_orig</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="mi">113</span><span class="p">:]</span>
+    
+    <span class="n">sensor</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">beam_mode</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">acq_date_raw</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span> <span class="c1">#need to parse further</span>
+    <span class="n">acq_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">acq_date_raw</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">acq_time</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">22</span><span class="p">]</span>
+    <span class="n">pol_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">25</span><span class="p">]</span> <span class="c1"># dual pol ...</span>
+    <span class="n">primary_pol</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">25</span><span class="p">:</span><span class="mi">26</span><span class="p">]</span> <span class="c1"># VV ...</span>
+    <span class="n">orbit_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">26</span><span class="p">:</span><span class="mi">27</span><span class="p">]</span> <span class="c1">#Precise (P), Restituted (R), or Original Predicted (O)</span>
+    <span class="n">terrain_correction_pixel_spacing</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">27</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span> <span class="c1">#Terrain Correction Pixel Spacing</span>
+    <span class="n">rtc_alg</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">34</span><span class="p">]</span> <span class="c1">#Software Package Used: GAMMA (G)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">35</span><span class="p">]</span> <span class="c1">#  Gamma-0 (g) or Sigma-0 (s) Output</span>
+    <span class="n">output_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">36</span><span class="p">]</span> <span class="c1">#Power (p) or Decibel (d) or Amplitude (a) Output</span>
+    <span class="n">masked</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">37</span><span class="p">]</span>  <span class="c1">#Unmasked (u) or Water Masked (w)</span>
+    <span class="n">filtered</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">38</span><span class="p">]</span>  <span class="c1"># Not Filtered (n) or Filtered (f)</span>
+    <span class="n">area</span> <span class="o">=</span>  <span class="n">vv_fn</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span>       <span class="c1"># Entire Area (e) or Clipped Area (c)</span>
+    <span class="n">tbd</span> <span class="o">=</span>   <span class="n">vv_fn</span><span class="p">[</span><span class="mi">40</span><span class="p">]</span>   <span class="c1">#Dead Reckoning (d) or DEM Matching (m)</span>
+    <span class="n">product_id</span>  <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">42</span><span class="p">:</span><span class="mi">46</span><span class="p">]</span>  <span class="c1">#Product ID</span>
+    
+    <span class="n">attrs_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;sensor&#39;</span><span class="p">:</span> <span class="n">sensor</span><span class="p">,</span>
+                    <span class="s1">&#39;beam_mode&#39;</span><span class="p">:</span><span class="n">beam_mode</span><span class="p">,</span> 
+                    <span class="s1">&#39;acquisition_date&#39;</span> <span class="p">:</span> <span class="n">acq_date</span><span class="p">,</span>
+                    <span class="s1">&#39;acquisition_time&#39;</span><span class="p">:</span> <span class="n">acq_time</span><span class="p">,</span>
+                    <span class="s1">&#39;polarisation_type&#39;</span><span class="p">:</span> <span class="n">pol_type</span><span class="p">,</span>
+                    <span class="s1">&#39;primary_polarisation&#39;</span><span class="p">:</span> <span class="n">primary_pol</span><span class="p">,</span>
+                    <span class="s1">&#39;orbit_type&#39;</span><span class="p">:</span> <span class="n">orbit_type</span><span class="p">,</span>
+                    <span class="s1">&#39;terrain_correction_pixel_spacing&#39;</span> <span class="p">:</span> <span class="n">terrain_correction_pixel_spacing</span><span class="p">,</span>
+                    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span>
+                    <span class="s1">&#39;output_type&#39;</span><span class="p">:</span> <span class="n">output_type</span><span class="p">,</span>
+                    <span class="s1">&#39;masked&#39;</span> <span class="p">:</span> <span class="n">masked</span><span class="p">,</span>
+                    <span class="s1">&#39;filtered&#39;</span><span class="p">:</span><span class="n">filtered</span><span class="p">,</span>
+                    <span class="s1">&#39;area&#39;</span><span class="p">:</span><span class="n">area</span><span class="p">,</span>
+                    <span class="s1">&#39;product_id&#39;</span><span class="p">:</span> <span class="n">product_id</span> 
+             <span class="p">}</span>
+                    
+    <span class="c1">#link the strings for each of the above variables to their full names (from README, commented above)</span>
+    <span class="c1">#eg if output_type=g, should read &#39;gamma&#39;</span>
+    <span class="c1">#add these as attrs to xr obj, make into dict first? </span>
+    <span class="c1"># parse acq_date to datetime, add as dim and coordinate to xr obj</span>
+    <span class="c1">#add other metadata vars as attributes to xr obj</span>
+    
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs_dict</span>
+    
+    <span class="n">utm_zone</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">spatial_ref</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;crs_wkt&#39;</span><span class="p">][</span><span class="mi">17</span><span class="p">:</span><span class="mi">29</span><span class="p">]</span>
+    <span class="n">epsg_code</span> <span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">spatial_ref</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;crs_wkt&#39;</span><span class="p">][</span><span class="mi">589</span><span class="p">:</span><span class="mi">594</span><span class="p">]</span>
+    
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;utm_zone&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utm_zone</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;epsg_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;EPSG:</span><span class="si">{</span><span class="n">epsg_code</span><span class="si">}</span><span class="s1">&#39;</span>
+    
+    <span class="n">date</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;acquisition_date&#39;</span><span class="p">]</span>
+    
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="s1">&#39;acq_date&#39;</span><span class="p">:</span><span class="n">date</span><span class="p">})</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s1">&#39;acq_date&#39;</span><span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">da</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">preprocess_ls</span><span class="p">(</span><span class="n">da_orig</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;function that should return an xarray object with time dimension and associated metadata given a path to a single RTC scene, if its dualpol will have multiple bands, currently just as 2 data arrays but could merge.</span>
+<span class="sd">    goal would be to apply this a list of directories for different RTC products, return cube along time dimension - I think? </span>
+<span class="sd">    - for concatenating, would need to check footprints and only take products with the same footprint, or subset them all to a common AOI? &#39;&#39;&#39;</span>
+
+    
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da_orig</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s1">&#39;band_data&#39;</span><span class="p">:</span><span class="s1">&#39;layover_shadow_mask&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    
+    <span class="n">vv_fn</span> <span class="o">=</span> <span class="n">da_orig</span><span class="o">.</span><span class="n">encoding</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="mi">113</span><span class="p">:]</span>
+    
+    <span class="n">sensor</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">beam_mode</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+    <span class="n">acq_date_raw</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span> <span class="c1">#need to parse further</span>
+    <span class="n">acq_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">acq_date_raw</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">acq_time</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">15</span><span class="p">:</span><span class="mi">22</span><span class="p">]</span>
+    <span class="n">pol_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">25</span><span class="p">]</span> <span class="c1"># dual pol ...</span>
+    <span class="n">primary_pol</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">25</span><span class="p">:</span><span class="mi">26</span><span class="p">]</span> <span class="c1"># VV ...</span>
+    <span class="n">orbit_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">26</span><span class="p">:</span><span class="mi">27</span><span class="p">]</span> <span class="c1">#Precise (P), Restituted (R), or Original Predicted (O)</span>
+    <span class="n">terrain_correction_pixel_spacing</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">27</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span> <span class="c1">#Terrain Correction Pixel Spacing</span>
+    <span class="n">rtc_alg</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">33</span><span class="p">:</span><span class="mi">34</span><span class="p">]</span> <span class="c1">#Software Package Used: GAMMA (G)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">35</span><span class="p">]</span> <span class="c1">#  Gamma-0 (g) or Sigma-0 (s) Output</span>
+    <span class="n">output_type</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">36</span><span class="p">]</span> <span class="c1">#Power (p) or Decibel (d) or Amplitude (a) Output</span>
+    <span class="n">masked</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">37</span><span class="p">]</span>  <span class="c1">#Unmasked (u) or Water Masked (w)</span>
+    <span class="n">filtered</span> <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">38</span><span class="p">]</span>  <span class="c1"># Not Filtered (n) or Filtered (f)</span>
+    <span class="n">area</span> <span class="o">=</span>  <span class="n">vv_fn</span><span class="p">[</span><span class="mi">39</span><span class="p">]</span>       <span class="c1"># Entire Area (e) or Clipped Area (c)</span>
+    <span class="n">tbd</span> <span class="o">=</span>   <span class="n">vv_fn</span><span class="p">[</span><span class="mi">40</span><span class="p">]</span>   <span class="c1">#Dead Reckoning (d) or DEM Matching (m)</span>
+    <span class="n">product_id</span>  <span class="o">=</span> <span class="n">vv_fn</span><span class="p">[</span><span class="mi">42</span><span class="p">:</span><span class="mi">46</span><span class="p">]</span>  <span class="c1">#Product ID</span>
+    
+    <span class="n">attrs_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;sensor&#39;</span><span class="p">:</span> <span class="n">sensor</span><span class="p">,</span>
+                    <span class="s1">&#39;beam_mode&#39;</span><span class="p">:</span><span class="n">beam_mode</span><span class="p">,</span> 
+                    <span class="s1">&#39;acquisition_date&#39;</span> <span class="p">:</span> <span class="n">acq_date</span><span class="p">,</span>
+                    <span class="s1">&#39;acquisition_time&#39;</span><span class="p">:</span> <span class="n">acq_time</span><span class="p">,</span>
+                    <span class="s1">&#39;polarisation_type&#39;</span><span class="p">:</span> <span class="n">pol_type</span><span class="p">,</span>
+                    <span class="s1">&#39;primary_polarisation&#39;</span><span class="p">:</span> <span class="n">primary_pol</span><span class="p">,</span>
+                    <span class="s1">&#39;orbit_type&#39;</span><span class="p">:</span> <span class="n">orbit_type</span><span class="p">,</span>
+                    <span class="s1">&#39;terrain_correction_pixel_spacing&#39;</span> <span class="p">:</span> <span class="n">terrain_correction_pixel_spacing</span><span class="p">,</span>
+                    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span>
+                    <span class="s1">&#39;output_type&#39;</span><span class="p">:</span> <span class="n">output_type</span><span class="p">,</span>
+                    <span class="s1">&#39;masked&#39;</span> <span class="p">:</span> <span class="n">masked</span><span class="p">,</span>
+                    <span class="s1">&#39;filtered&#39;</span><span class="p">:</span><span class="n">filtered</span><span class="p">,</span>
+                    <span class="s1">&#39;area&#39;</span><span class="p">:</span><span class="n">area</span><span class="p">,</span>
+                    <span class="s1">&#39;product_id&#39;</span><span class="p">:</span> <span class="n">product_id</span> 
+             <span class="p">}</span>
+                    
+    <span class="c1">#link the strings for each of the above variables to their full names (from README, commented above)</span>
+    <span class="c1">#eg if output_type=g, should read &#39;gamma&#39;</span>
+    <span class="c1">#add these as attrs to xr obj, make into dict first? </span>
+    <span class="c1"># parse acq_date to datetime, add as dim and coordinate to xr obj</span>
+    <span class="c1">#add other metadata vars as attributes to xr obj</span>
+    
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs_dict</span>
+    
+    <span class="n">utm_zone</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">spatial_ref</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;crs_wkt&#39;</span><span class="p">][</span><span class="mi">17</span><span class="p">:</span><span class="mi">29</span><span class="p">]</span>
+    <span class="n">epsg_code</span> <span class="o">=</span><span class="n">da</span><span class="o">.</span><span class="n">spatial_ref</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;crs_wkt&#39;</span><span class="p">][</span><span class="mi">589</span><span class="p">:</span><span class="mi">594</span><span class="p">]</span>
+    
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;utm_zone&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">utm_zone</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;epsg_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;EPSG:</span><span class="si">{</span><span class="n">epsg_code</span><span class="si">}</span><span class="s1">&#39;</span>
+    
+    <span class="n">date</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;acquisition_date&#39;</span><span class="p">]</span>
+    
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">assign_coords</span><span class="p">({</span><span class="s1">&#39;acq_date&#39;</span><span class="p">:</span><span class="n">date</span><span class="p">})</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="s1">&#39;acq_date&#39;</span><span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+    
+    <span class="c1">#vec = gpd.read_file(&#39;https://github.com/e-marshall/s1_book/raw/main/data/hma_lakes_aoi.geojson&#39;)</span>
+    <span class="c1">#print(vec.crs)</span>
+    <span class="c1">#da_clip = da.rio.clip(vec.geometry, vec.crs, drop=True)</span>
+    <span class="c1">#print(da_clip.crs)</span>
+    
+    <span class="k">return</span> <span class="n">da</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>First, let’s call <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code> with the argument <code class="docutils literal notranslate"><span class="pre">chunks='auto'</span></code>. This will read in a dask array where ideal chunk sizes are selected based off the array size, it will attempt to have chunk sizes where bytes are equal to the configuration value for array chunk size. More about that <a class="reference external" href="https://docs.dask.org/en/stable/array-chunks.html#automatic-chunking">here</a>.You can check the configuration value for an array chunk size with the code below:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dask</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;array.chunk-size&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;128MiB&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_vh</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_vh</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess</span><span class="p">,</span> <span class="n">chunks</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span><span class="o">=</span><span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_vh</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_vh</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess</span><span class="p">,</span> <span class="n">chunks</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span><span class="o">=</span><span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="ne">NameError</span>: name &#39;preprocess&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_vh</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">11</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_vh</span>
+
+<span class="ne">NameError</span>: name &#39;asf_vh&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>If we take a look at the <code class="docutils literal notranslate"><span class="pre">asf_vh</span></code> object we just created (click the stack icon on the right of the <code class="docutils literal notranslate"><span class="pre">vh</span></code> variable tab), we see that the chunking is quite complicated. This isn’t ideal because it can create problems like excessive communication between workers (?) (and a lot of memory usage) down the line when we perform non-lazy operations. It seems like the <code class="docutils literal notranslate"><span class="pre">'auto'</span></code> chunking is applied to the top layer (file) of the dataset, but because the spatial footprint of each file is not the same, the ‘auto’ chunking does not persist through layers and we end up with the funky layout in the object above.</p>
+<p>Let’s create both the VV and VH objects with <code class="docutils literal notranslate"><span class="pre">chunks=None</span></code> and see how it looks:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_vh</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_vh</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess_vh</span><span class="p">,</span> <span class="n">chunks</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span><span class="o">=</span><span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">OSError</span><span class="g g-Whitespace">                                   </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">12</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_vh</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_vh</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess_vh</span><span class="p">,</span> <span class="n">chunks</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span><span class="o">=</span><span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba-root/envs/s1rtc/lib/python3.10/site-packages/xarray/backends/api.py:937,</span> in <span class="ni">open_mfdataset</span><span class="nt">(paths, chunks, concat_dim, compat, preprocess, engine, data_vars, coords, combine, parallel, join, attrs_file, combine_attrs, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">934</span>     <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="k">else</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">936</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">937</span>     <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;no files to open&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">939</span> <span class="k">if</span> <span class="n">combine</span> <span class="o">==</span> <span class="s2">&quot;nested&quot;</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">940</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">))</span> <span class="ow">or</span> <span class="n">concat_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="ne">OSError</span>: no files to open
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_vv</span><span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_vv</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess_vv</span><span class="p">,</span> <span class="n">chunks</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span><span class="o">=</span><span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">OSError</span><span class="g g-Whitespace">                                   </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">13</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_vv</span><span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_vv</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess_vv</span><span class="p">,</span> <span class="n">chunks</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span><span class="o">=</span><span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba-root/envs/s1rtc/lib/python3.10/site-packages/xarray/backends/api.py:937,</span> in <span class="ni">open_mfdataset</span><span class="nt">(paths, chunks, concat_dim, compat, preprocess, engine, data_vars, coords, combine, parallel, join, attrs_file, combine_attrs, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">934</span>     <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="k">else</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">936</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">937</span>     <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;no files to open&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">939</span> <span class="k">if</span> <span class="n">combine</span> <span class="o">==</span> <span class="s2">&quot;nested&quot;</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">940</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">))</span> <span class="ow">or</span> <span class="n">concat_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="ne">OSError</span>: no files to open
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_ls</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_ls</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess_ls</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span> <span class="o">=</span> <span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">OSError</span><span class="g g-Whitespace">                                   </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">14</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_ls</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span><span class="n">paths</span> <span class="o">=</span> <span class="n">fpaths_ls</span><span class="p">,</span> <span class="n">preprocess</span> <span class="o">=</span> <span class="n">preprocess_ls</span><span class="p">,</span> <span class="n">chunks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;rasterio&#39;</span><span class="p">,</span> <span class="n">data_vars</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="s1">&#39;minimal&#39;</span><span class="p">,</span> <span class="n">concat_dim</span> <span class="o">=</span> <span class="s1">&#39;acq_date&#39;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="s1">&#39;nested&#39;</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba-root/envs/s1rtc/lib/python3.10/site-packages/xarray/backends/api.py:937,</span> in <span class="ni">open_mfdataset</span><span class="nt">(paths, chunks, concat_dim, compat, preprocess, engine, data_vars, coords, combine, parallel, join, attrs_file, combine_attrs, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">934</span>     <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="k">else</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">936</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">937</span>     <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;no files to open&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">939</span> <span class="k">if</span> <span class="n">combine</span> <span class="o">==</span> <span class="s2">&quot;nested&quot;</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">940</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">concat_dim</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">))</span> <span class="ow">or</span> <span class="n">concat_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="ne">OSError</span>: no files to open
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now our chunks are quite large, but they are at least in a format that makes more sense for our dataset. This will make it easier to clip the object to our area of interest, which will solve the problem of large chunks</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_vv</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">15</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_vv</span>
+
+<span class="ne">NameError</span>: name &#39;asf_vv&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_vh</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">16</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_vh</span>
+
+<span class="ne">NameError</span>: name &#39;asf_vh&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_ls</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">17</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_ls</span>
+
+<span class="ne">NameError</span>: name &#39;asf_ls&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>Merge the VH, VV and layover-shadow mask objects into one <code class="docutils literal notranslate"><span class="pre">xr.Dataset</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span><span class="s1">&#39;vv&#39;</span><span class="p">:</span><span class="n">asf_vv</span><span class="o">.</span><span class="n">vv</span><span class="p">,</span> <span class="s1">&#39;vh&#39;</span><span class="p">:</span><span class="n">asf_vh</span><span class="o">.</span><span class="n">vh</span><span class="p">,</span> <span class="s1">&#39;ls&#39;</span><span class="p">:</span><span class="n">asf_ls</span><span class="o">.</span><span class="n">layover_shadow_mask</span><span class="p">})</span>
+<span class="n">asf_ds</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">18</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span><span class="s1">&#39;vv&#39;</span><span class="p">:</span><span class="n">asf_vv</span><span class="o">.</span><span class="n">vv</span><span class="p">,</span> <span class="s1">&#39;vh&#39;</span><span class="p">:</span><span class="n">asf_vh</span><span class="o">.</span><span class="n">vh</span><span class="p">,</span> <span class="s1">&#39;ls&#39;</span><span class="p">:</span><span class="n">asf_ls</span><span class="o">.</span><span class="n">layover_shadow_mask</span><span class="p">})</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">asf_ds</span>
+
+<span class="ne">NameError</span>: name &#39;asf_vv&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you take a look at the <code class="docutils literal notranslate"><span class="pre">acq_date</span></code> coordinate, you will see that they are not in order. Let’s sort by the <code class="docutils literal notranslate"><span class="pre">acq_date</span></code> (time) dimension using xarray <code class="docutils literal notranslate"><span class="pre">.sortby()</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_ds_sorted</span> <span class="o">=</span> <span class="n">asf_ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">asf_ds</span><span class="o">.</span><span class="n">acq_date</span><span class="p">)</span>
+<span class="n">asf_ds_sorted</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">19</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_ds_sorted</span> <span class="o">=</span> <span class="n">asf_ds</span><span class="o">.</span><span class="n">sortby</span><span class="p">(</span><span class="n">asf_ds</span><span class="o">.</span><span class="n">acq_date</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">asf_ds_sorted</span>
+
+<span class="ne">NameError</span>: name &#39;asf_ds&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="clip-stack-to-aoi-using-rioxarray-clip">
+<h2>Clip stack to AOI using <code class="docutils literal notranslate"><span class="pre">rioxarray.clip()</span></code><a class="headerlink" href="#clip-stack-to-aoi-using-rioxarray-clip" title="Permalink to this headline">#</a></h2>
+<p>This is a pretty unwieldly object (nearly 200 GB). Let’s subset it down to just the area we want to focus on. Read in the following GeoJSON to clip the dataset to the area of interest we’ll be using in this tutorial. This AOI covers a region in the central Himalaya near the Chinese border. We will use the <code class="docutils literal notranslate"><span class="pre">rioxarray.clip()</span></code> function which you can read more about <a class="reference external" href="https://corteva.github.io/rioxarray/stable/examples/clip_geom.html">here</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>provide more background on region/AOI here, plus use  cartopy to add basemap to the plot of AOI?</p>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pc_aoi</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s1">&#39;https://github.com/e-marshall/sentinel1_rtc/raw/main/hma_rtc_aoi.geojson&#39;</span><span class="p">)</span>
+<span class="n">pc_aoi</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>POLYGON ((619420.000 3089790.000, 628100.000 3...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pc_aoi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;AxesSubplot: &gt;
+</pre></div>
+</div>
+<img alt="_images/asf_local_mf_40_1.png" src="_images/asf_local_mf_40_1.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_clip</span> <span class="o">=</span> <span class="n">asf_ds_sorted</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pc_aoi</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">pc_aoi</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">22</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_clip</span> <span class="o">=</span> <span class="n">asf_ds_sorted</span><span class="o">.</span><span class="n">rio</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pc_aoi</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">pc_aoi</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+<span class="ne">NameError</span>: name &#39;asf_ds_sorted&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>Check the size of the clipped object:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">asf_clip</span><span class="o">.</span><span class="n">nbytes</span><span class="o">/</span><span class="mf">1e6</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">23</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">asf_clip</span><span class="o">.</span><span class="n">nbytes</span><span class="o">/</span><span class="mf">1e6</span>
+
+<span class="ne">NameError</span>: name &#39;asf_clip&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#we don&#39;t want to compute this right now, will kill kernel</span>
+<span class="c1">#asf_clip_load = asf_clip.compute()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The dataset is published as gamma-nought values on the power scale. This is useful for performing statistical analysis but not always for visualization. We convert to decibel scale (sigma-nought) in order to visualize variability in backscatter more easily. Read more about scales used to represent SAR data <a class="reference external" href="https://hyp3-docs.asf.alaska.edu/guides/rtc_product_guide/#sar-scales">here</a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">power_to_db</span><span class="p">(</span><span class="n">input_arr</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">input_arr</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+
+<span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="n">power_to_db</span><span class="p">(</span><span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">vv</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys_r</span><span class="p">);</span>
+<span class="n">power_to_db</span><span class="p">(</span><span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">vh</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys_r</span><span class="p">);</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Layover-shadow mask (L), VV (C) and VH (R) backscatter on </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">acq_date</span><span class="o">.</span><span class="n">data</span><span class="p">)[:</span><span class="o">-</span><span class="mi">19</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">26</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+<span class="ne">----&gt; </span><span class="mi">3</span> <span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">power_to_db</span><span class="p">(</span><span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">vv</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys_r</span><span class="p">);</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="n">power_to_db</span><span class="p">(</span><span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">vh</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys_r</span><span class="p">);</span>
+
+<span class="ne">NameError</span>: name &#39;asf_clip&#39; is not defined
+</pre></div>
+</div>
+<img alt="_images/asf_local_mf_47_1.png" src="_images/asf_local_mf_47_1.png" />
+</div>
+</div>
+<p><strong>layover shadow mask interpreation</strong>:</p>
+<p>the values are a summation of 17 possible pixel values:</p>
+<p>0 - not tested for layover or shadow
+1 - not affected by layover or shadow</p>
+<p>3 - look angle &lt; slope angle</p>
+<p>5 - affected by layover</p>
+<p>7 - affected by layover, look angle &lt; slope</p>
+<p>9 - look angle &lt; opposite slope angle</p>
+<p>11 - look angle &lt; slope and opposite slope angle</p>
+<p>13 - affected by layover; look angle &lt; opposite slope angle</p>
+<p>15 - affected by layover; look angle &lt; slope and opposite slope angle</p>
+<p>17 - affected by shadow</p>
+<p>19 - affected by shadow; look angle &lt; slope angle</p>
+<p>21 - affected by layover and shadow</p>
+<p>23 -</p>
+<p>Let’s write a quick function to take a look at a similar breakdown for other time steps more easily:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>clean up attr labeling in these plots</p>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_timestep</span><span class="p">(</span><span class="n">input_arr</span><span class="p">,</span> <span class="n">time_step_int</span><span class="p">):</span>
+    
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+
+    <span class="n">input_arr</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="n">time_step_int</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+    <span class="n">power_to_db</span><span class="p">(</span><span class="n">input_arr</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="n">time_step_int</span><span class="p">)</span><span class="o">.</span><span class="n">vv</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys_r</span><span class="p">);</span>
+    <span class="n">power_to_db</span><span class="p">(</span><span class="n">input_arr</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="n">time_step_int</span><span class="p">)</span><span class="o">.</span><span class="n">vh</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Greys_r</span><span class="p">);</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Layover-shadow mask (L), VV (C) and VH (R) backscatter </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="n">time_step_int</span><span class="p">)</span><span class="o">.</span><span class="n">acq_date</span><span class="p">)[:</span><span class="o">-</span><span class="mi">19</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_timestep</span><span class="p">(</span><span class="n">asf_clip</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">28</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">plot_timestep</span><span class="p">(</span><span class="n">asf_clip</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
+
+<span class="ne">NameError</span>: name &#39;asf_clip&#39; is not defined
+</pre></div>
+</div>
+</div>
+</div>
+<p>It looks like there are some interesting differences between the geometric distortions within the two images. Let’s take a look at them side-by-side:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+
+<span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vmax</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">);</span>
+<span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vmax</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span> <span class="p">[</span><span class="mi">29</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+<span class="ne">----&gt; </span><span class="mi">3</span> <span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vmax</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="mi">1</span><span class="p">);</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">asf_clip</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">acq_date</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span><span class="o">.</span><span class="n">ls</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vmax</span> <span class="o">=</span> <span class="mi">22</span><span class="p">,</span> <span class="n">vmin</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">)</span>
+
+<span class="ne">NameError</span>: name &#39;asf_clip&#39; is not defined
+</pre></div>
+</div>
+<img alt="_images/asf_local_mf_53_1.png" src="_images/asf_local_mf_53_1.png" />
+</div>
+</div>
+<p>It looks like there are areas affected by different distortion effects on different dates. For example, in the lower left quadrant, there is a region that is blue (5) on 6/7/2010 but most of that area appears green (19) on 6/10/2010. On 6/7, that area is affected by layover, but on 6/10 much of that same area seems to be in the radar shadow. This is likely due to different viewing geometries on different orbital passes: one of the above scenes was likely collected during an ascending pass and one during a descending.</p>
+</section>
+<section id="wrap-up">
+<h2>Wrap-up<a class="headerlink" href="#wrap-up" title="Permalink to this headline">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code> approach is very useful for reading in large amounts of data from a number of distributed files very efficiently. It’s especially helpful that the <code class="docutils literal notranslate"><span class="pre">preprocess()</span></code> function allows a large degree of customization for how the data is read in, and that the appropriate metadata is preserved as individual <code class="docutils literal notranslate"><span class="pre">xr.DataArrays</span></code> are organized into data cubes and we have to do very little further work of organizing metadata.</p>
+<p>However, due to the nature of this stack of data, where each time-element of the stack covers a common region of interest but does not have a uniform spatial footprint (re-word), this approach is not very computationally efficient. We are reading in a vast footprint of data to subset it to a much smaller area. While it is able to execute on this machine, a more computationally-intensive workflow would fail.</p>
+<p>Another approach we can try is to use gdal VRT objects. Gdal vrt objects create an xml file from a list of geotiff files. The xml contains a mapping of all of the specified raster files so that we essentially have the spatial information that would have been used to create the full data object, and all of the information we need for a clip. VRT objects are able to handle the mismatch of grids within the stack of files, so does not encounter the memory issues that we get when trying the <code class="docutils literal notranslate"><span class="pre">xr.open_mfdataset()</span></code> approach with dask.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>maybe take the below section out?</p>
+</div>
+</section>
+<section id="convert-from-power-to-db-scale">
+<h2>Convert from power to db scale<a class="headerlink" href="#convert-from-power-to-db-scale" title="Permalink to this headline">#</a></h2>
+<p>In the above plots, we wrapped the xarray objects in the <code class="docutils literal notranslate"><span class="pre">power_to_db()</span></code> function to convert the data from power-scale to decibel-scale (from gamma-nought to sigma-nought). The cells below will demonstrate how to use xarray functionality to transform the power-scale objects to decibel-scale objects if we wanted to work with them further.</p>
+<p>The first way you might think to do this would be to create a new <code class="docutils literal notranslate"><span class="pre">xr.Dataset</span></code> object out of the <code class="docutils literal notranslate"><span class="pre">vrt_clip</span></code> object by applying <code class="docutils literal notranslate"><span class="pre">power_to_db()</span></code> to each <code class="docutils literal notranslate"><span class="pre">xr.DataArray</span></code> object (see the code below). However, there is an easier way to do this that requires less lines of code and uses more built-in xarray functionality. This is to use the <code class="docutils literal notranslate"><span class="pre">.map()</span></code> or <code class="docutils literal notranslate"><span class="pre">.apply()</span></code> function. <code class="docutils literal notranslate"><span class="pre">apply()</span></code> is a backwards compatible version of <code class="docutils literal notranslate"><span class="pre">.map()</span></code>. Read more about them <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.apply.html?highlight=apply()">here</a> and <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.map.html#xarray.Dataset.map">here</a>. This powerful function let’s us apply the transformation to each variable within an <code class="docutils literal notranslate"><span class="pre">xr.Dataset</span></code> object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#asf_clip_sigma1 = xr.Dataset({&#39;vv&#39;:power_to_db(asf_clip.vv),</span>
+<span class="c1">#                  &#39;vh&#39;:power_to_db(asf_clip.vh),</span>
+<span class="c1">#                    &#39;ls&#39;:asf_clip.ls})</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#asf_clip_sigma_m = asf_clip.map(power_to_db)</span>
+<span class="c1">#asf_clip_sigma_a = asf_clip.apply(power_to_db)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#asf_clip_sigma_m.equals(asf_clip_sigma_a)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#asf_clip_sigma_m.equals(asf_clip_sigma1)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#asf_clip_sigma = asf_clip_sigma_m</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#asf_clip_sigma</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="ch1_root.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Data cleaning and organization</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="asf_local_vrt_troubleshoot.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">GDAL VRT approach</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By emma marshall<br/>
+  
+      &copy; Copyright 2022.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>
